@@ -1,119 +1,80 @@
-# Automated Security Testing Lab (ASTL)
+# Security Monitoring Lab
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/Docker-20.10%2B-blue)](https://www.docker.com/)
-[![n8n](https://img.shields.io/badge/n8n-Latest-orange)](https://n8n.io/)
-
-A comprehensive, containerized security testing environment designed for small to medium-sized networks (up to 50 devices). Features automated vulnerability assessment, threat hunting, and incident response capabilities.
+A comprehensive security monitoring and testing environment with integrated dashboards and analysis tools.
 
 ## 🚀 Features
 
-- **Automated Security Workflows**: Pre-configured n8n workflows for common security tasks
-- **Multi-Level Security Testing**: Support for basic to advanced security operations
-- **Isolated Testing Environment**: Separate networks for attack simulation and monitoring
-- **Resource-Optimized**: Configured for optimal performance on smaller networks
-- **Compliance Ready**: Automated compliance checking and reporting
+- **Real-time Security Monitoring**
+  - Grafana Dashboards
+  - Prometheus Metrics
+  - Elasticsearch Integration
+  - Custom Security Visualizations
 
-## 🚀 Quick Start
+- **Security Tools Integration**
+  - Suricata Network Monitoring
+  - OWASP ZAP Web Scanner
+  - Nuclei Vulnerability Scanner
+  - Custom Security Checks
 
-```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/ethical-hacking-lab.git
-cd ethical-hacking-lab
+- **Automated Analysis**
+  - Scheduled Security Scans
+  - Automated Reporting
+  - Alert Management
+  - Incident Response Workflows
 
-# Start the lab
-./manage-lab.sh start
+## 📊 Dashboards
 
-# Check status
-./manage-lab.sh status
+- Security Overview
+- Network Monitoring
+- Vulnerability Tracking
+- System Metrics
 
-# Stop the lab
-./manage-lab.sh stop
-```
+## 🛠 Quick Start
 
-## 📋 Prerequisites
+1. **Clone the Repository**
+   ```bash
+   git clone git@github.com:GDEUHI/security-monitoring-lab.git
+   cd security-monitoring-lab
+   ```
 
-- Docker Desktop 20.10+
-- 8GB RAM minimum
-- 50GB free disk space
-- macOS/Linux environment
+2. **Start the Environment**
+   ```bash
+   docker-compose up -d
+   ```
 
-## 🔑 Default Credentials
-
-- **n8n**:
-  - URL: http://localhost:5678
-  - Username: admin
-  - Password: changeme
-
-- **Kibana**:
-  - URL: http://localhost:5601
-  - No authentication (development setup)
-
-- **Elasticsearch**:
-  - URL: http://localhost:9200
-  - No authentication (development setup)
-
-## 📋 Available Commands
-
-```bash
-./manage-lab.sh {start|stop|restart|status|logs [service]}
-
-Examples:
-  ./manage-lab.sh start    - Start all services
-  ./manage-lab.sh stop     - Stop all services
-  ./manage-lab.sh restart  - Restart all services
-  ./manage-lab.sh status   - Check service health
-  ./manage-lab.sh logs n8n - Show logs for n8n
-```
-
-## 🔄 Sample Workflows
-
-1. **Network Discovery** (`workflows/basic/1-network-discovery.json`)
-   - Performs network scanning using nmap
-   - Saves results to Elasticsearch
-   - Runs on demand
-
-2. **Vulnerability Scanning** (`workflows/basic/2-vulnerability-scan.json`)
-   - Checks Metasploit framework status
-   - Runs every 5 minutes
-   - Logs results to Elasticsearch
-
-3. **Incident Response** (`workflows/basic/3-incident-response.json`)
-   - Connects to Wazuh manager
-   - Retrieves agent status
-   - Logs incidents to Elasticsearch
-
-## 🏗 Architecture
-
-### Core Components
-- **n8n**: Workflow automation
-- **Elasticsearch**: Data storage
-- **Kibana**: Visualization
-- **Wazuh**: Security monitoring
-- **Metasploit**: Penetration testing
-- **Kali Linux**: Security tools
-
-### Networks
-- **security_net**: Internal monitoring network
-- **attack_net**: Isolated network for security testing
-
-## 🛡 Security Considerations
-
-- Default credentials are for testing only
-- Change all passwords before deployment
-- Review network isolation settings
-- Monitor resource usage
+3. **Access Grafana**
+   - URL: http://localhost:3001
+   - Username: admin
+   - Password: admin
 
 ## 📚 Documentation
 
-- [Architecture Details](docs/ARCHITECTURE.md)
-- [Security Guidelines](docs/SECURITY.md)
-- [Workflow Details](docs/WORKFLOWS.md)
-- [API Documentation](docs/API.md)
-- [Setup Guide](docs/SETUP.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [Security Hardening](docs/HARDENING.md)
-- [Wazuh Component Guide](docs/components/WAZUH.md)
+- [Grafana Plugins Guide](docs/GRAFANA_PLUGINS.md)
+- [Security Tools Setup](docs/SECURITY_TOOLS.md)
+- [Dashboard Configuration](docs/DASHBOARDS.md)
+- [API Integration](docs/API_INTEGRATION.md)
+
+## 🔧 Architecture
+
+- **Monitoring Stack**
+  - Grafana (Visualization)
+  - Prometheus (Metrics)
+  - Elasticsearch (Log Storage)
+
+- **Security Tools**
+  - Suricata
+  - OWASP ZAP
+  - Nuclei
+  - Custom Scripts
+
+## 🔐 Security Features
+
+- Real-time threat detection
+- Network traffic analysis
+- Vulnerability scanning
+- Security metrics collection
+- Custom alert rules
+- Automated reporting
 
 ## 🤝 Contributing
 
@@ -121,13 +82,18 @@ Examples:
 2. Create your feature branch
 3. Commit your changes
 4. Push to the branch
-5. Create a new Pull Request
+5. Create a Pull Request
 
-## 📄 License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📧 Contact
+## 🌟 Repositories
 
-- Project Link: https://github.com/YOUR_USERNAME/ethical-hacking-lab
-- Issue Tracker: https://github.com/YOUR_USERNAME/ethical-hacking-lab/issues
+- GitHub: [security-monitoring-lab](https://github.com/GDEUHI/security-monitoring-lab)
+- GitLab: [kastelofanderlecht](https://gitlab.com/kingdomofanderlecht/kastelofanderlecht)
+
+## ⚡ Maintainers
+
+- GDEUHI
+- Kingdom of Anderlecht

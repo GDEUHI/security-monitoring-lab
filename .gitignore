@@ -1,70 +1,18 @@
-# Data directories
-data/
-**/data/
-
-# Environment files
+# Environment variables and secrets
 .env
+*.env
 .env.*
-
-# Logs
-*.log
-logs/
-
-# Node modules
-node_modules/
-**/node_modules/
-
-# Docker volumes
-volumes/
-**/volumes/
-
-# IDE files
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-temp/
-
-# Security-sensitive files
-*.key
-*.pem
-*.crt
-*.cer
-*.p12
-
-# n8n credentials
-.n8n/
-**/.n8n/
-
-# Elasticsearch data
-elasticsearch_data/
-
-# Wazuh data
-wazuh_data/
-
-# MSF data
-.msf4/
-msf_data/
+!.env.example
 
 # Docker volumes
 **/data/
-
-# Environment variables
-.env
 
 # Logs
 *.log
 
 # System files
 .DS_Store
+Thumbs.db
 
 # Grafana generated files
 grafana.db
@@ -80,3 +28,18 @@ prometheus_data/
 .vscode/
 *.swp
 *.swo
+
+# SSH keys and certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.priv
+
+# Other sensitive files
+*.password
+*.secret
+*.token
+credentials.yml
+secrets.yml
