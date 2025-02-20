@@ -1,0 +1,46 @@
+{
+  "name": "Google Security Scanner Integration",
+  "nodes": [
+    {
+      "parameters": {
+        "scopes": [
+          "https://www.googleapis.com/auth/cloud-platform"
+        ],
+        "project": "{{ $PROJECT_ID }}",
+        "organization": "{{ $ORG_ID }}"
+      },
+      "name": "Google Cloud Security Scanner",
+      "type": "n8n-nodes-base.googleApi",
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "index": "security-scans",
+        "document": "=data",
+        "operation": "index"
+      },
+      "name": "Save to Elasticsearch",
+      "type": "n8n-nodes-base.elasticsearch",
+      "position": [
+        450,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Google Cloud Security Scanner": {
+      "main": [
+        [
+          {
+            "node": "Save to Elasticsearch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

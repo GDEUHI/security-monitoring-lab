@@ -1,0 +1,42 @@
+{
+    "name": "Security Backup Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{"field": "hours", "expression": "24"}]
+                }
+            },
+            "name": "Daily Backup",
+            "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+            "parameters": {
+                "command": "tar -czf /backups/security_logs_$(date +%Y%m%d).tar.gz /var/log/",
+                "executeTimeout": 3600
+            },
+            "name": "Create Backup",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "command": "find /backups/ -type f -mtime +7 -delete",
+                "executeTimeout": 300
+            },
+            "name": "Cleanup Old Backups",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "YOUR_NOTIFICATION_ENDPOINT",
+                "sendBody": true,
+                "bodyParameters": {
+                    "message": "Daily security backup completed"
+                }
+            },
+            "name": "Send Notification",
+            "type": "n8n-nodes-base.httpRequest"
+        }
+    ]
+}

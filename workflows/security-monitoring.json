@@ -1,0 +1,108 @@
+{
+    "name": "Security Monitoring Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "expression": "*/5"
+                        }
+                    ]
+                }
+            },
+            "name": "Schedule Trigger",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "http://elasticsearch:9200/_search",
+                "sendQuery": true,
+                "queryParameters": {
+                    "q": "severity:high"
+                }
+            },
+            "name": "Query Elasticsearch",
+            "type": "n8n-nodes-base.httpRequest",
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json[\"hits\"][\"total\"][\"value\"]}}",
+                            "operation": "larger",
+                            "value2": "0"
+                        }
+                    ]
+                }
+            },
+            "name": "IF",
+            "type": "n8n-nodes-base.if",
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=YOUR_WEBHOOK_URL",
+                "sendBody": true,
+                "bodyParameters": {
+                    "text": "High severity security alert detected!"
+                }
+            },
+            "name": "Send Alert",
+            "type": "n8n-nodes-base.httpRequest",
+            "position": [
+                850,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Query Elasticsearch",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Query Elasticsearch": {
+            "main": [
+                [
+                    {
+                        "node": "IF",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF": {
+            "main": [
+                [
+                    {
+                        "node": "Send Alert",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

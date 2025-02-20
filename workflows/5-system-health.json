@@ -1,0 +1,56 @@
+{
+    "name": "System Health Monitor Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{"field": "minutes", "expression": "5"}]
+                }
+            },
+            "name": "Regular Check",
+            "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+            "parameters": {
+                "jsCode": "const checks = [\n  'df -h',\n  'free -m',\n  'top -b -n 1'\n];\nreturn {json: {commands: checks}};"
+            },
+            "name": "Prepare Commands",
+            "type": "n8n-nodes-base.code"
+        },
+        {
+            "parameters": {
+                "command": "={{$json.command}}",
+                "executeTimeout": 30
+            },
+            "name": "Execute Health Checks",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{$json.diskUsage}}",
+                            "operation": "larger",
+                            "value2": 90
+                        }
+                    ]
+                }
+            },
+            "name": "Check Thresholds",
+            "type": "n8n-nodes-base.if"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "YOUR_ALERT_ENDPOINT",
+                "sendBody": true,
+                "bodyParameters": {
+                    "alert": "System resource threshold exceeded"
+                }
+            },
+            "name": "Send Alert",
+            "type": "n8n-nodes-base.httpRequest"
+        }
+    ]
+}

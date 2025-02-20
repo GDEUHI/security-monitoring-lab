@@ -1,0 +1,56 @@
+{
+    "name": "Level 1 - Automated Network Discovery",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{"field": "hours", "expression": "6"}]
+                }
+            },
+            "name": "Schedule",
+            "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+            "parameters": {
+                "command": "nmap -sn 192.168.1.0/24 -oX /tmp/network_devices.xml",
+                "executeTimeout": 300
+            },
+            "name": "Discover Devices",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "jsCode": "const devices = $input.all()[0].json;\nconst knownDevices = loadJSON('known_devices.json');\nconst newDevices = devices.filter(d => !knownDevices.includes(d));\nreturn {json: {new: newDevices, total: devices.length}};"
+            },
+            "name": "Compare Devices",
+            "type": "n8n-nodes-base.code"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json.new.length > 0}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "name": "New Device Check",
+            "type": "n8n-nodes-base.if"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "YOUR_ALERT_WEBHOOK",
+                "sendBody": true,
+                "bodyParameters": {
+                    "message": "New devices detected on network",
+                    "devices": "={{$json.new}}"
+                }
+            },
+            "name": "Alert New Device",
+            "type": "n8n-nodes-base.httpRequest"
+        }
+    ]
+}

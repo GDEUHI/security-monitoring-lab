@@ -1,0 +1,41 @@
+{
+    "name": "Firewall Monitoring Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{"field": "minutes", "expression": "15"}]
+                }
+            },
+            "name": "Regular Check",
+            "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+            "parameters": {
+                "command": "iptables -L -n -v",
+                "executeTimeout": 60
+            },
+            "name": "Get Firewall Rules",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "jsCode": "const rules = $input.all()[0].json.stdout.split('\\n');\nconst blocked = rules.filter(r => r.includes('DROP'));\nreturn {json: {blocked_ips: blocked}};"
+            },
+            "name": "Parse Rules",
+            "type": "n8n-nodes-base.code"
+        },
+        {
+            "parameters": {
+                "url": "http://elasticsearch:9200/firewall/_doc",
+                "sendBody": true,
+                "bodyParameters": {
+                    "data": "={{$json}}",
+                    "timestamp": "={{$now}}"
+                }
+            },
+            "name": "Store Data",
+            "type": "n8n-nodes-base.httpRequest"
+        }
+    ]
+}

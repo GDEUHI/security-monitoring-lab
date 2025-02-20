@@ -1,0 +1,45 @@
+{
+    "name": "Log Analysis Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{"field": "hours", "expression": "1"}]
+                }
+            },
+            "name": "Hourly Check",
+            "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+            "parameters": {
+                "url": "http://elasticsearch:9200/_search",
+                "sendQuery": true,
+                "queryParameters": {
+                    "q": "error OR failed OR unauthorized",
+                    "size": "100"
+                }
+            },
+            "name": "Search Logs",
+            "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+            "parameters": {
+                "jsCode": "const logs = $input.all()[0].json.hits.hits;\nconst summary = {\n  error_count: logs.length,\n  categories: {}\n};\n\nfor (const log of logs) {\n  const category = log._source.category || 'unknown';\n  summary.categories[category] = (summary.categories[category] || 0) + 1;\n}\n\nreturn {json: summary};"
+            },
+            "name": "Analyze Logs",
+            "type": "n8n-nodes-base.code"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "YOUR_REPORTING_ENDPOINT",
+                "sendBody": true,
+                "bodyParameters": {
+                    "report": "={{$json}}"
+                }
+            },
+            "name": "Generate Report",
+            "type": "n8n-nodes-base.httpRequest"
+        }
+    ]
+}

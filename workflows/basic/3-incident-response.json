@@ -1,0 +1,131 @@
+{
+  "name": "Incident Response Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "http://wazuh-manager:55000/security/user/authenticate",
+        "authentication": "genericCredentials",
+        "genericCredentials": {
+          "user": "wazuh",
+          "password": "wazuh"
+        },
+        "options": {}
+      },
+      "name": "Wazuh Auth",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://wazuh-manager:55000/agents",
+        "authentication": "genericCredentials",
+        "genericCredentials": {
+          "user": "wazuh",
+          "password": "wazuh"
+        },
+        "options": {}
+      },
+      "name": "Get Agents",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"data\"][\"total_affected_items\"]}}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Has Agents?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://elasticsearch:9200/incidents/_doc",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "agent_count",
+              "value": "={{$node[\"Get Agents\"].json[\"data\"][\"total_affected_items\"]}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now}}"
+            }
+          ]
+        }
+      },
+      "name": "Log Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Wazuh Auth": {
+      "main": [
+        [
+          {
+            "node": "Get Agents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Agents": {
+      "main": [
+        [
+          {
+            "node": "Has Agents?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Agents?": {
+      "main": [
+        [
+          {
+            "node": "Log Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

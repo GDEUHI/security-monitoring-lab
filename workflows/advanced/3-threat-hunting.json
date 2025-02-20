@@ -1,0 +1,47 @@
+{
+    "name": "Level 3 - Automated Threat Hunting",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{"field": "hours", "expression": "4"}]
+                }
+            },
+            "name": "Regular Hunt",
+            "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+            "parameters": {
+                "url": "https://otx.alienvault.com/api/v1/pulses/subscribed",
+                "headers": {
+                    "X-OTX-API-KEY": "YOUR_API_KEY"
+                }
+            },
+            "name": "Get Threat Intel",
+            "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+            "parameters": {
+                "functionCode": "const iocs = $input.all()[0].json.iocs;\nconst commands = [];\n\nfor (const ioc of iocs) {\n  if (ioc.type === 'ip') {\n    commands.push(`suricata-update add-source ${ioc.value}`);\n  }\n}\n\nreturn {json: {commands}};"
+            },
+            "name": "Process IOCs",
+            "type": "n8n-nodes-base.function"
+        },
+        {
+            "parameters": {
+                "command": "={{$json.command}}",
+                "executeTimeout": 60
+            },
+            "name": "Update Rules",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "command": "suricata-update",
+                "executeTimeout": 300
+            },
+            "name": "Apply Updates",
+            "type": "n8n-nodes-base.executeCommand"
+        }
+    ]
+}

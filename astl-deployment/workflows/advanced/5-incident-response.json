@@ -1,0 +1,50 @@
+{
+    "name": "Level 2 - Automated Incident Response",
+    "nodes": [
+        {
+            "parameters": {
+                "webhookEndpoint": "/security-alert"
+            },
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const alert = $input.all()[0].json;\nconst severity = calculateSeverity(alert);\nreturn {json: {alert, severity}};"
+            },
+            "name": "Assess Severity",
+            "type": "n8n-nodes-base.code"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{$json.severity}}",
+                            "operation": "larger",
+                            "value2": 7
+                        }
+                    ]
+                }
+            },
+            "name": "High Severity?",
+            "type": "n8n-nodes-base.if"
+        },
+        {
+            "parameters": {
+                "command": "iptables -I INPUT -s {{$json.alert.source_ip}} -j DROP",
+                "executeTimeout": 30
+            },
+            "name": "Block IP",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "command": "docker exec -it kali tcpdump -w /shared/incident_{{$json.alert.id}}.pcap host {{$json.alert.source_ip}}",
+                "executeTimeout": 300
+            },
+            "name": "Capture Traffic",
+            "type": "n8n-nodes-base.executeCommand"
+        }
+    ]
+}

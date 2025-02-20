@@ -1,0 +1,50 @@
+{
+    "name": "Level 1 - Automated Compliance Audit",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [{"field": "days", "expression": "1"}]
+                }
+            },
+            "name": "Daily Audit",
+            "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+            "parameters": {
+                "command": "docker exec kali lynis audit system --quick",
+                "executeTimeout": 600
+            },
+            "name": "System Audit",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "command": "docker exec kali oscap-podman image-cve kali:latest",
+                "executeTimeout": 600
+            },
+            "name": "Container Scan",
+            "type": "n8n-nodes-base.executeCommand"
+        },
+        {
+            "parameters": {
+                "jsCode": "const results = $input.all();\nconst report = {\n  system: parseAuditResults(results[0].json),\n  containers: parseContainerScan(results[1].json)\n};\nreturn {json: report};"
+            },
+            "name": "Generate Report",
+            "type": "n8n-nodes-base.code"
+        },
+        {
+            "parameters": {
+                "url": "http://elasticsearch:9200/compliance/_doc",
+                "method": "POST",
+                "sendBody": true,
+                "bodyParameters": {
+                    "report": "={{$json}}",
+                    "timestamp": "={{$now}}"
+                }
+            },
+            "name": "Store Report",
+            "type": "n8n-nodes-base.httpRequest"
+        }
+    ]
+}

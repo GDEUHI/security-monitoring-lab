@@ -1,0 +1,55 @@
+# Data directories
+data/
+**/data/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Docker volumes
+volumes/
+**/volumes/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+
+# Security-sensitive files
+*.key
+*.pem
+*.crt
+*.cer
+*.p12
+
+# n8n credentials
+.n8n/
+**/.n8n/
+
+# Elasticsearch data
+elasticsearch_data/
+
+# Wazuh data
+wazuh_data/
+
+# MSF data
+.msf4/
+msf_data/
