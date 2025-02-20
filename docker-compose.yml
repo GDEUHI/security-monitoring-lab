@@ -1,45 +1,6 @@
 version: '3.8'
 
 services:
-  # Level 1 - Basic Security Monitoring
-  n8n:
-    image: n8nio/n8n
-    platform: ${PLATFORM:-linux/arm64}
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASS:-changeme}
-      - N8N_HOST=0.0.0.0
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - NODE_ENV=production
-    volumes:
-      - n8n_data:/home/node/.n8n
-    networks:
-      - security_net
-      - attack_net
-    ports:
-      - "5678:5678"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-
-  wazuh-manager:
-    image: wazuh/wazuh-manager:4.3.10
-    platform: linux/amd64  # Wazuh only supports amd64
-    hostname: wazuh-manager
-    restart: always
-    volumes:
-      - wazuh_data:/var/ossec/data
-    networks:
-      - security_net
-    ports:
-      - "2514:1514"
-      - "2515:1515"
-      - "2516:514/udp"
-      - "5500:55000"
-
-  # Level 2 - Advanced Monitoring and Analysis
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
     platform: ${PLATFORM:-linux/arm64}
@@ -48,6 +9,7 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=false
       - bootstrap.memory_lock=true
+      - xpack.monitoring.collection.enabled=true
     ulimits:
       memlock:
         soft: -1
@@ -58,57 +20,54 @@ services:
       - security_net
     ports:
       - "9200:9200"
-      - "9300:9300"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9200"]
       interval: 30s
       timeout: 10s
       retries: 5
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.0
+  prometheus:
+    image: prom/prometheus:latest
     platform: ${PLATFORM:-linux/arm64}
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
     networks:
       - security_net
-    ports:
-      - "5601:5601"
 
-  # Level 3 - Advanced Security Testing
-  kali:
-    image: kalilinux/kali-rolling
+  grafana:
+    image: grafana/grafana:latest
     platform: ${PLATFORM:-linux/arm64}
-    command: tail -f /dev/null
-    networks:
-      - attack_net
-    volumes:
-      - ./data/kali:/root
-
-  metasploit:
-    image: metasploitframework/metasploit-framework
-    platform: linux/amd64  # Metasploit only supports amd64
-    networks:
-      - attack_net
-    volumes:
-      - ./data/msf:/home/msf/.msf4
     environment:
-      - MSF_USER=msf
-      - MSF_GROUP=msf
-      - MSF_UID=1000
-      - MSF_GID=1000
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - security_net
+    depends_on:
+      - prometheus
+      - elasticsearch
 
 networks:
   security_net:
     driver: bridge
-  attack_net:
-    driver: bridge
-    internal: true
 
 volumes:
   elasticsearch_data:
-  n8n_data:
-  wazuh_data:
+  prometheus_data:
+  grafana_data:

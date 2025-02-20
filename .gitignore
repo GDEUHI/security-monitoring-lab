@@ -53,3 +53,30 @@ wazuh_data/
 # MSF data
 .msf4/
 msf_data/
+
+# Docker volumes
+**/data/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+
+# Grafana generated files
+grafana.db
+
+# Elasticsearch data
+elasticsearch_data/
+
+# Prometheus data
+prometheus_data/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
